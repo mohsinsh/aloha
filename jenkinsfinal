@@ -1,0 +1,66 @@
+1) API DOC
+https://www.npmjs.com/package/jenkins-api-findly
+2)install jenkins setup
+
+
+
+var express = require('express');
+var router = express.Router();
+var util = require("util");
+var request = require('request');
+
+
+var https=require('https');
+
+
+var jenkinsapi = require('jenkins-api');
+// or with auth
+//var jenkins = jenkinsapi.init("http://mohsinsh:password@jenkins.yoursite.com");
+var jenkins = jenkinsapi.init("http://localhost:8080");
+//var jenkins = jenkinsapi.init("http://mohsinsh@alohatechnology.com/******@jenkins.yoursite.com");
+
+/* GET home page. */
+router.get('/', function(req, res) {
+
+             //list all jobs
+             jenkins.all_jobs(function(err, data) {
+
+             if (err){ return console.log(err); }
+             for (var loop = 0; loop < data.length; loop++ ){	
+             	 
+            		buildInfo( data[loop].name,   function (data) {
+            			console.log("data"+util.inspect(data))
+            			
+            		});
+            		
+              } 
+             });
+	       
+	         
+               
+
+                  function buildInfo(buildname,buildInfo) {
+	               var object = [];
+ 	               jenkins.last_build_info(buildname, function(err, data) {
+	 	            if (err){
+	 	 	            return console.log(err);
+	 	            }else     {
+	 		         for (var loop = 0; loop < data.id; loop++){
+				       jenkins.build_info(buildname, loop, function(err, data) {
+					 if (err){
+					 	 console.log(err); 
+					 }else{
+						buildInfo(data);
+					}		 
+				});
+	 		}
+	 		
+	 	}	
+	});
+}
+
+
+       
+  });
+
+module.exports = router;
